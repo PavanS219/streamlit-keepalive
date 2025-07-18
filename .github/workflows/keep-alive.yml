@@ -34,7 +34,7 @@ jobs:
         # Replace these URLs with your actual Streamlit app URLs
         apps = [
             'https://edvanced-summarizer.streamlit.app/',
-            'https://rag-chatbot-fxpuymjmqgbf49cghe5wxe.streamlit.app/'
+            'https://hsycxenhcwc8p3mebb2yzl.streamlit.app/'
         ]
         
         print("🚀 Starting Streamlit Keep-Alive Service...")
