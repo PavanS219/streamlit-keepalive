@@ -1,0 +1,67 @@
+name: Keep Streamlit Apps Alive
+
+on:
+  schedule:
+    # Run every 10 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allow manual trigger from GitHub UI
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install requests library
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    
+    - name: Ping Streamlit Apps
+      run: |
+        python << 'EOF'
+        import requests
+        import time
+        from datetime import datetime
+        
+        # Replace these URLs with your actual Streamlit app URLs
+        apps = [
+            'https://edvanced-summarizer.streamlit.app/',
+            'https://rag-chatbot-fxpuymjmqgbf49cghe5wxe.streamlit.app/'
+        ]
+        
+        print("🚀 Starting Streamlit Keep-Alive Service...")
+        print(f"🕐 Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        
+        for app in apps:
+            try:
+                print(f"📡 Pinging {app}...")
+                response = requests.get(app, timeout=30)
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                
+                if response.status_code == 200:
+                    print(f"✅ [{timestamp}] Successfully pinged {app}")
+                    print(f"📊 Response time: {response.elapsed.total_seconds():.2f} seconds")
+                else:
+                    print(f"⚠️ [{timestamp}] {app} returned status: {response.status_code}")
+                    
+            except requests.exceptions.Timeout:
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                print(f"⏰ [{timestamp}] Timeout error for {app}")
+                
+            except requests.exceptions.RequestException as e:
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                print(f"❌ [{timestamp}] Error pinging {app}: {str(e)}")
+            
+            # Small delay between requests
+            time.sleep(2)
+        
+        print("✨ Keep-alive cycle completed!")
+        EOF
